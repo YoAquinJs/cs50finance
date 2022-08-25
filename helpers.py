@@ -74,6 +74,7 @@ def timestamp_sort(elements: list, desc=False):
         return (int(datetime[0])*3214.08) + (int(datetime[1])*267.84) + (int(datetime[2])*8.64) + (int(datetime[3])*0.36) + (int(datetime[4])*0.006) + (int(datetime[5])*0.0001)
 
     for elem in elements:
+        print(elem)
         elem["timestamp"] = elem["timestamp"].replace(" ", "-").replace(":", "-").split("-")
 
     count = 1
