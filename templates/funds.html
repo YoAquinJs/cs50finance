@@ -1,0 +1,76 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Funds
+{% endblock %}
+
+{% block main %}
+    <div class="mb-3">
+        <h3>Available Funds</h3>
+        <h3>{{cash | usd}}</h3>
+    </div>
+    <br>
+    <form action="/funds" method="post">
+        <div class="mb-3">
+            <select class="form-select mx-auto w-auto" name="action" id="action">
+                <option selected id="retire" value="transfer">Transfer</option>
+                <option id="retire" value="retire">Retire</option>
+            </select>
+        </div>
+
+        <div class="mb-3">
+            <input required autocomplete="off" autofocus class="form-control mx-auto w-auto" id="account" name="account" placeholder="Account (any pattern)" type="text" value="{{account}}">
+        </div>
+
+        <div class="mb-3">
+            <input required class="form-control mx-auto w-auto" id="amount" name="amount" placeholder="Amount" type="number" value="{{amount}}" min="0" step="0.01">
+        </div>
+
+        <div class="mb-3">
+            <input required class="form-control mx-auto w-auto" id="password" name="password" placeholder="Password" type="password" value="{{password}}">
+        </div>
+
+        <br>
+
+        <div class="mb-3">
+            <input class="form-control mx-auto w-auto" id="alias" name="alias" placeholder="Account Alias (optional)" type="text" value="{{alias}}">
+        </div>
+
+        <button class="btn btn-primary" type="submit" id="submit">Continue</button>
+    </form>
+
+    <br>
+    <div class="mb-3">
+        <h3>Delete account</h3>
+    </div>
+
+    <form action="/delete" method="post">
+        <div class="mb-3">
+            <input required autocomplete="off" autofocus class="form-control mx-auto w-auto" id="account" name="account" placeholder="Account (any pattern)" type="text" value="{{_account}}">
+        </div>
+
+        <div class="mb-3">
+            <input required class="form-control mx-auto w-auto" id="password" name="password" placeholder="Password" type="password" value="{{_password}}">
+        </div>
+
+        <button class="btn btn-primary" type="submit">Delete</button>
+    </form>
+
+    <script>
+        action = "{{action}}"
+        if (action != ""){
+            document.getElementById("action").value = action
+        }
+
+        button = document.getElementById("submit")
+        dropdown = document.getElementById("action")
+
+        function SetSubmit(){
+            button.innerHTML = dropdown.value.charAt(0).toUpperCase() + dropdown.value.slice(1)
+        }
+
+        SetSubmit()
+        dropdown.addEventListener("change", SetSubmit)
+    </script>
+
+{% endblock %}

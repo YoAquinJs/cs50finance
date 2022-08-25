@@ -1,0 +1,27 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Sell
+{% endblock %}
+
+{% block main %}
+    <form action="/sell" method="post">
+        <div class="mb-3">
+            <select class="form-select mx-auto w-auto" name="symbol" id="symbol_select">
+                <option disabled selected value="None">Symbol</option>
+                {% for symbol in symbols %}
+                    <option value="{{symbol}}" id="{{symbol}}">{{symbol}}</option>
+                {% endfor %}
+            </select>
+            <script>
+                if ({{selected}} != null){
+                    document.getElementById("symbol_select").value = "{{selected}}"
+                }
+            </script>
+        </div>
+        <div class="mb-3">
+            <input required autocomplete="off" autofocus class="form-control mx-auto w-auto" id="shares" name="shares" placeholder="Shares amount" type="number" min="1" value="{{shares}}">
+        </div>
+        <button class="btn btn-primary" type="submit">Sell</button>
+    </form>
+{% endblock %}
