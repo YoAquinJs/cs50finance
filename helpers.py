@@ -75,7 +75,7 @@ def timestamp_sort(elements: list, desc=False):
 
     for elem in elements:
         print("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
-        print(timestamp())
+        print(elem["timestamp"])
         print("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
 
         elem["timestamp"] = elem["timestamp"].replace(" ", "-").replace(":", "-").split("-")
