@@ -28,7 +28,7 @@ print(uri)
 print(os.environ.get("API_KEY"))
 if uri.startswith("postgres://"):
     uri = uri.replace("postgres://", "postgresql://")
-db = SQL(uri)
+db = SQL("sqlite:///finance.db")
 
 # Make sure API key is set
 if not os.environ.get("API_KEY"):
