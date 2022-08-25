@@ -24,6 +24,7 @@ Session(app)
 
 # Configure sql database
 uri = os.getenv("DATABASE_URL")
+print(uri)
 if uri.startswith("postgres://"):
     uri = uri.replace("postgres://", "postgresql://")
 db = SQL(uri)
