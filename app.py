@@ -23,11 +23,10 @@ app.config["SESSION_TYPE"] = "filesystem"
 Session(app)
 
 # Configure sql database
-uri = os.getenv("DATABASE_URL")
-print(uri)
-print(os.environ.get("API_KEY"))
-if uri.startswith("postgres://"):
-    uri = uri.replace("postgres://", "postgresql://")
+# uri = os.getenv("DATABASE_URL")
+
+# if uri.startswith("postgres://"):
+#     uri = uri.replace("postgres://", "postgresql://")
 db = SQL("sqlite:///finance.db")
 
 # Make sure API key is set
@@ -143,7 +142,7 @@ def buy():
 
         #change user stocks
         stock_db = db.execute("SELECT shares FROM stocks WHERE user_id=? AND stock=?", session["user_id"], stock["symbol"])
-        print(stock_db)
+
         if len(stock_db) != 1:
             db.execute("INSERT INTO stocks (user_id, stock, shares) VALUES (?,?,?)", session["user_id"], stock["symbol"], shares)
         else:
@@ -412,17 +411,13 @@ def sell():
                 buy_price += (row["shares"] - row["selled"]) * row["price"]
                 break
             elif sharesBought > shares:
-                print(rows)
-                print(sharesBought)
-                print(buy_price)
+
                 for i in range(rows-1):
                     db.execute("UPDATE transactions SET analisys=0 WHERE user_id=? AND id=?", session["user_id"], buys[i]["id"])
 
                 selled = (shares - sharesBought + row["shares"] - row["selled"])
                 buy_price += selled * row["price"]
                 db.execute("UPDATE transactions SET selled=? WHERE user_id=? AND id=?", row["selled"] + selled, session["user_id"], row["id"])
-                print(buy_price)
-
                 break
 
             rows += 1
@@ -553,16 +548,26 @@ def analisys():
                     row["buy_price"] = 0
 
         if row["shares"] < 0:
-            totalT += (row["price"]*row["shares"]*-1) - row["buy_price"]
+            revenue = (row["price"]*row["shares"]*-1) - row["buy_price"]
+
+            if round(revenue, 1) < 0:
+                revenue_color = RED
+            elif round(revenue, 1) > 0:
+                revenue_color = GREEN
+            else:
+                revenue_color = BLANCK
+
+            totalT += revenue
             transactions.append({
                 "symbol":row["symbol"],
                 "shares":row["shares"],
                 "buy_price":row["buy_price"]/(row["shares"]*-1),
                 "price":row["price"],
                 "percentage":round((row["price"]/(row["buy_price"]/(row["shares"]*-1)))*100 - 100, 2),
-                "revenue":(row["price"]*row["shares"]*-1) - row["buy_price"],
+                "revenue":revenue,
                 "transacted":row["timestamp"],
-                "color":RED
+                "color":RED,
+                "r-color": revenue_color
             })
             continue
 
@@ -571,16 +576,26 @@ def analisys():
 
         stock = stock_data[row["symbol"]] = lookup(row["symbol"])
 
-        totalT += (stock["price"] - row["price"])*(row["shares"] - row["selled"])
+        revenue = (stock["price"] - row["price"])*(row["shares"] - row["selled"])
+
+        if round(revenue, 1) < 0:
+            revenue_color = RED
+        elif round(revenue, 1) > 0:
+            revenue_color = GREEN
+        else:
+            revenue_color = BLANCK
+
+        totalT += revenue
         transactions.append({
-            "symbol":row["symbol"],
-            "shares":(row["shares"] - row["selled"]),
-            "buy_price":row["price"],
-            "price":stock["price"],
-            "percentage":round((stock["price"]/row["price"])*100 - 100, 2),
-            "revenue":(stock["price"] - row["price"])*(row["shares"] - row["selled"]),
-            "transacted":row["timestamp"],
-            "color":GREEN
+            "symbol": row["symbol"],
+            "shares": (row["shares"] - row["selled"]),
+            "buy_price": row["price"],
+            "price": stock["price"],
+            "percentage": round((stock["price"]/row["price"])*100 - 100, 2),
+            "revenue": revenue,
+            "transacted": row["timestamp"],
+            "color": GREEN,
+            "r-color": revenue_color
         })
 
     # Format user stock data and analisys
@@ -604,15 +619,14 @@ def analisys():
         else:
             color = BLANCK
 
-        print(row)
         stocks.append({
-            "symbol":row["stock"],
-            "shares":row["shares"],
-            "buy_price":row["buy_price"]/row["shares"],
-            "price":stock["price"],
-            "percentage":round(((stock["price"]*row["shares"])/row["buy_price"])*100 - 100, 2),
-            "revenue":revenue,
-            "color":color
+            "symbol": row["stock"],
+            "shares": row["shares"],
+            "buy_price": row["buy_price"]/row["shares"],
+            "price": stock["price"],
+            "percentage": round(((stock["price"]*row["shares"])/row["buy_price"])*100 - 100, 2),
+            "revenue": revenue,
+            "color": color
         })
 
     if totalStckBuyPrice > 0:
@@ -695,26 +709,24 @@ def security():
 
             return logout()
         elif action == "recovery":
-            questions = [request.form.get("question1")]
-            answers = [request.form.get("answer1")]
+            questions = []
+            answers = []
 
-            if not questions[0]:
-                flash("must provide at least one question")
-                return render_template("security.html")
-
-            if not answers[0]:
-                flash("must provide at least one answer")
-                return render_template("security.html")
-
-            for i in range (2, 6, 1):
-                print(i)
+            # Iterate trought user input
+            for i in range(1, 6):
                 question = request.form.get(f"question{i}")
                 answer = request.form.get(f"answer{i}")
 
+                # Save valid questions and answers
                 if question != None and question != "":
                     questions.append(question)
                 if answer != None and answer != "":
                     answers.append(answer)
+
+            # Ensure at least 1 question was submited
+            if len(questions) < 1:
+                flash("must provide at least one question")
+                return render_template("security.html")
 
             if len(questions) != len(answers):
                 flash("must provide same number of questions and answers")
@@ -753,7 +765,7 @@ def recovery():
                 return render_template("recovery.html", action="search")
 
             row = db.execute("SELECT id FROM users WHERE username=?", username)
-            print(row)
+
             # Ensure user is found
             if len(row) != 1:
                 flash("username not found")
@@ -892,37 +904,9 @@ def delete():
 
         session.clear()
 
-        print(total_funds)
         flash(f"${total_funds} transfered, account deleted")
         return redirect("/register")
 
     # User reached route via GET (as by clicking a link or via redirect)
     else:
         return redirect("/funds")
-
-
-# @app.route("/password", methods=["GET", "POST"])
-# @login_required
-# def password():
-#     """Require password for action"""
-
-#     if request.method == "POST":
-
-#         if not request.form.get("password"):
-#             flash("must provide password")
-#             return render_template("password.html")
-
-#         # Query database for username password hash
-#         user = db.execute("SELECT hash FROM users WHERE id = ?", session["user_id"])[0]
-
-#         # Ensure password is correct
-#         if not check_password_hash(user["hash"], request.form.get("password")):
-#             flash("invalid password")
-#             return render_template("password.html")
-
-#         # Redirect user to last process
-#         respond = session["password_respond"]
-#         session["password_respond"] = True
-#         return redirect(respond)
-#     else:
-#         return render_template("password.html")
