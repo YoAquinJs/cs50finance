@@ -108,19 +108,23 @@ def buy():
 
         # Ensure symbol was submitted
         if not symbol:
-            return apology("must provide symbol", 400)
+            flash("Must provide symbol")
+            return render_template("buy.html", shares=1)
 
         # Ensure shares was submitted
         if not shares:
-            return apology("must provide shares amount", 400)
+            flash("Must provide shares")
+            return render_template("buy.html", shares=1, symbol=symbol)
 
         # Ensure that shares is a positive integer
         try:
             if int(shares) < 1:
-                return apology("must provide a valid shares amount", 400)
+                flash("Must provida valid amount of shares")
+                return render_template("buy.html", shares=1, symbol=symbol)
             shares = int(shares)
         except:
-            return apology("must provide a valid shares amount", 400)
+            flash("Must provida valid amount of shares")
+            return render_template("buy.html", shares=1, symbol=symbol)
 
         # Search for stock
         stock = lookup(symbol)
@@ -128,14 +132,16 @@ def buy():
 
         # Ensure stock was found
         if stock is None:
-            return apology("must provide a valid stock symbol", 404)
+            flash("Must include numbers")
+            return render_template("buy.html", shares=1, symbol=symbol)
 
         # Cost of transaction
         cost = stock["price"] * shares
 
         # Ensure that user can aford transaction
         if cost > cash:
-            return apology(f"balance is not enough to afford {shares} {stock['name']} shares", 403)
+            flash(f"balance is not enough to afford {shares} {stock['name']} shares")
+            return render_template("buy.html", shares=1, symbol=symbol)
 
         # Change user balance
         db.execute("UPDATE users SET cash=? WHERE id=?", cash - cost, session["user_id"])
@@ -197,22 +203,26 @@ def login():
 
         # Ensure username was submitted
         if not username:
-            return apology("must provide username", 400)
+            flash("Must provide username")
+            return render_template("login.html", username=username, password=password)
 
         # Ensure password was submitted
         if not password:
-            return apology("must provide password", 400)
+            flash("Must provide password")
+            return render_template("login.html", username=username, password=password)
 
         # Query database for username
         rows = db.execute("SELECT * FROM users WHERE username = ?", request.form.get("username"))
 
         # Ensure username exists
         if len(rows) != 1:
-            return apology("invalid username", 404)
+            flash("Username not found")
+            return render_template("login.html", username=username, password=password)
 
         # Ensure password is correct
         if not check_password_hash(rows[0]["hash"], request.form.get("password")):
-            return apology("invalid username", 401)
+            flash("Incorrect password")
+            return render_template("login.html", username=username, password=password)
 
         # Remember which user has logged in
         session["user_id"] = rows[0]["id"]
@@ -249,7 +259,8 @@ def quote():
 
         # Ensure symbol was submitted
         if not symbol:
-            return apology("must provide symbol", 400)
+            flash("Must provide symbol")
+            return render_template("quote.html")
 
         # Search for stock
         result = lookup(symbol)
@@ -263,7 +274,7 @@ def quote():
 
     # User reached route via GET (as by clicking a link or via redirect)
     else:
-        return render_template("quote.html"), 200
+        return render_template("quote.html")
 
 
 @app.route("/register", methods=["GET", "POST"])
@@ -280,22 +291,27 @@ def register():
 
         # Ensure username was submitted
         if not username:
-            return apology("must provide password", 400)
+            flash("Must provide username")
+            return render_template("register.html", username=username, password=password, confirmation=confirmation)
 
         # Ensure password was submitted
         if not password:
-            return apology("must provide password", 400)
+            flash("Must provide password")
+            return render_template("register.html", username=username, password=password, confirmation=confirmation)
 
         # Ensure password confirmation was submitted
         if not confirmation:
-            return apology("must provide password confirmation", 400)
+            flash("Must provide password confirmation")
+            return render_template("register.html", username=username, password=password, confirmation=confirmation)
 
         # Ensure username dont already exists
         if len(db.execute("SELECT * FROM users WHERE username = ?", username)) > 0:
-            return apology("username already in use", 403)
+            flash("Username already in use")
+            return render_template("register.html", username=username, password=password, confirmation=confirmation)
 
         if password != confirmation:
-            return apology("passwords must match", 400)
+            flash("Passwords must match")
+            return render_template("register.html", username=username, password=password, confirmation=confirmation)
 
         # Ensure password is secure, password contains at least 8 characters, letters, numbers and symbols
         if len(password) < 8:
@@ -326,7 +342,7 @@ def register():
 
     # User reached route via GET (as by clicking a link or via redirect)
     else:
-        return render_template("register.html"), 200
+        return render_template("register.html")
 
 
 @app.route("/sell", methods=["GET", "POST"])
@@ -349,10 +365,12 @@ def sell():
 
         # Ensure symbol was submitted
         if not symbol:
-            return apology("must provide symbol", 400)
+            flash("Must provide a stock symbol")
+            return render_template("sell.html", shares=1, symbols=stocks)
 
         if symbol not in stocks:
-            return apology("must provide a stock you have bought", 403)
+            flash("Must provide a stock you have bought")
+            return render_template("sell.html", shares=1, symbols=stocks)
 
         shares_db = db.execute("SELECT shares FROM stocks WHERE user_id=? AND stock=?", session["user_id"], symbol)[0]["shares"]
 
@@ -362,25 +380,30 @@ def sell():
 
         # Ensure shares was submitted
         if not shares:
-            return apology("must provide shares amount", 400)
+            flash("Must provide shares amount")
+            return render_template("sell.html", shares=1, symbols=stocks)
 
         # Ensure that shares is a positive integer
         try:
             if int(shares) < 1:
-                return apology("must provide a valid shares amount", 400)
+                flash("Must provide a valid shares amount")
+                return render_template("sell.html", shares=1, symbols=stocks)
             shares = int(shares)
         except:
-            return apology("must provide a valid shares amount", 400)
+            flash("Must provide a valid shares amount")
+            return render_template("sell.html", shares=1, symbols=stocks)
 
         if  shares > shares_db:
-            return apology("must provide an amount of shares you own", 403)
+            flash("Must provide an amount of shares you have bought")
+            return render_template("sell.html", shares=1, symbols=stocks)
 
         # Search for stock
         stock = lookup(symbol)
 
         # Ensure stock was found
         if stock is None:
-            return apology("must provide a valid stock symbol", 404)
+            flash("Must provide a valid stock name")
+            return render_template("sell.html", shares=1, symbols=stocks)
 
         # Calculate transaction revenue
         revenue = stock["price"] * shares
@@ -432,7 +455,7 @@ def sell():
 
     # User reached route via GET (as by clicking a link or via redirect)
     else:
-        return render_template("sell.html", shares=1, symbols=stocks), 200
+        return render_template("sell.html", shares=1, symbols=stocks)
 
 
 @app.route("/funds", methods=["GET", "POST"])
@@ -741,7 +764,7 @@ def security():
 
             return redirect("/")
         else:
-            return apology("unvalid action", 400)
+            return apology("Unvalid action", 400)
 
     # User reached route via GET (as by clicking a link or via redirect)
     else:
@@ -851,7 +874,7 @@ def recovery():
             flash("password changed")
             return redirect("/")
         else:
-            return apology("unvalid action", 400)
+            return apology("Unvalid action", 400)
 
     # User reached route via GET (as by clicking a link or via redirect)
     else:
