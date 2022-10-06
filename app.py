@@ -67,9 +67,15 @@ def index():
 
     stocks_response = []
     total = user["cash"]
+
+    msg = False
     for row in stocks:
         # Query latest stock data
         stock = lookup(row["stock"])
+
+        if stock["price"] == 0 and msg is False:
+            flash("Couldn't Fetch Stock")
+            msg = True
 
         # Data to be send to user
         stock_total = stock["price"] * row["shares"]
@@ -133,6 +139,10 @@ def buy():
         # Ensure stock was found
         if stock is None:
             flash("Must include numbers")
+            return render_template("buy.html", shares=1, symbol=symbol)
+
+        if stock["price"] == 0:
+            flash("Couldn't Fetch Stock")
             return render_template("buy.html", shares=1, symbol=symbol)
 
         # Cost of transaction
@@ -269,6 +279,10 @@ def quote():
         if result is None:
             return render_template("quote.html", symbol=symbol, not_found=True)
 
+        if result["price"] == 0:
+            flash("Couldn't Fetch Stock")
+            return render_template("quote.html", symbol=symbol, not_found=True)
+
         # Search for stock and return the result to user
         return render_template("quote.html", result=result)
 
@@ -403,6 +417,10 @@ def sell():
         # Ensure stock was found
         if stock is None:
             flash("Must provide a valid stock name")
+            return render_template("sell.html", shares=1, symbols=stocks)
+
+        if stock["price"] == 0:
+            flash("Couldn't Fetch Stock")
             return render_template("sell.html", shares=1, symbols=stocks)
 
         # Calculate transaction revenue
@@ -599,6 +617,10 @@ def analisys():
 
         stock = stock_data[row["symbol"]] = lookup(row["symbol"])
 
+        if stock["price"] == 0:
+            flash("Couldn't Fetch Stock")
+            return redirect("/")
+
         revenue = (stock["price"] - row["price"])*(row["shares"] - row["selled"])
 
         if round(revenue, 1) < 0:
@@ -628,6 +650,10 @@ def analisys():
     for row in stocks_db:
         if row["stock"] not in stock_data.keys():
             stock = lookup(row["stock"])
+
+            if stock["price"] == 0:
+                flash("Couldn't Fetch Stock")
+                return redirect("/")
         else:
             stock = stock_data[row["stock"]]
 
@@ -914,7 +940,14 @@ def delete():
 
         # Sell each stock
         for stock in stocks_db:
-            total_funds += lookup(stock["stock"])["price"] * stock["shares"]
+            stock = lookup(stock["stock"])
+
+            if stock["price"] == 0:
+                flash("Couldn't Fetch Stock")
+                return render_template("funds.html", cash=user["cash"], _account=account, _password=password)
+
+            total_funds += stock["price"] * stock["shares"]
+
 
         # Transfer money to account
 

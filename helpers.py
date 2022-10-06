@@ -44,8 +44,15 @@ def lookup(symbol):
         api_key = os.environ.get("API_KEY")
         url = f"https://cloud.iexapis.com/stable/stock/{urllib.parse.quote_plus(symbol)}/quote?token={api_key}"
         response = requests.get(url)
+
         response.raise_for_status()
-    except requests.RequestException:
+    except requests.RequestException as e:
+        if str(e)[:3] == "402":
+            return {
+            "name": "Couldn't Fetch",
+            "price": 0,
+            "symbol": symbol
+        }
         return None
 
     # Parse response
