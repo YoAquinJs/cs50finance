@@ -1,0 +1,5 @@
+.env
+test.py
+.venv
+flask_session
+__pycache__

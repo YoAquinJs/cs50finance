@@ -1,0 +1,97 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Security
+{% endblock %}
+
+{% block main %}
+    <div class="mb-3">
+        <h3>Change Password</h3>
+    </div>
+
+    <form action="/security" method="post">
+        <input type="hidden" name="action" value="pasword">
+
+        <div class="mb-3">
+            <input required class="form-control mx-auto w-auto" id="password" name="password" placeholder="Password" type="password">
+        </div>
+
+        <div class="mb-3">
+            <input required class="form-control mx-auto w-auto" id="password" name="new_password" placeholder="New Password" type="password">
+        </div>
+
+        <div class="mb-3">
+            <input required class="form-control mx-auto w-auto" id="password" name="confirmation" placeholder="Confirmation" type="password">
+        </div>
+
+        <button class="btn btn-primary" type="submit">Change</button>
+    </form>
+
+    <br>
+
+    <div class="mb-3">
+        <h3>Password Recovery Questions</h3>
+    </div>
+
+    <div class="mb-3">
+        <button class="btn btn-primary" type="button" id="-">-</button>
+        <button class="btn btn-primary" type="button" id="+">+</button>
+    </div>
+
+    <form action="/security" method="post">
+        <input type="hidden" name="action" value="recovery">
+
+        <div class="mb-3">
+            <input required class="form-control mx-auto w-auto" id="password" name="password" placeholder="Password" type="password">
+        </div>
+
+        <div class="mb-3" id="recover-form">
+            <div class="mb-3">
+                <div class="mb-3">
+                    <input required class="form-control mx-auto w-auto" id="question1" name="question1" placeholder="Question" type="text">
+                </div>
+
+                <div class="mb-3">
+                    <input required class="form-control mx-auto w-auto" id="answer1" name="answer1" placeholder="Answer" type="text">
+                </div>
+            </div>
+        </div>
+
+        <button class="btn btn-primary" type="submit">Submit</button>
+    </form>
+
+    <script>
+        pairs = 1
+
+        form = document.getElementById("recover-form")
+
+        // + button
+        document.getElementById("+").onclick = function(){
+            if (pairs+1 > 5){
+                return
+            }
+            pairs++
+
+            form.innerHTML += `<div class="mb-3">
+                <div class="mb-3">
+                    <input required class="form-control mx-auto w-auto" id="question${pairs}" name="question${pairs}" placeholder="Question" type="text">
+                </div>
+
+                <div class="mb-3">
+                    <input required class="form-control mx-auto w-auto" id="answer${pairs}" name="answer${pairs}" placeholder="Answer" type="text">
+                </div>
+            </div>`
+        }
+
+        document.getElementById("-").onclick = function(){
+            if (pairs-1 < 1){
+                return
+            }
+            pairs--
+
+            form.removeChild(form.lastElementChild)
+        }
+
+    </script>
+
+{% endblock %}

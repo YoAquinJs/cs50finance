@@ -1,0 +1,91 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Analisys
+{% endblock %}
+
+{% block main %}
+    <main class="container py-5 text-center">
+        <div class="mb-3">
+            <h3>Trades:</h3>
+        </div>
+
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th class="text-start">Symbol</th>
+                    <th class="text-start">Shares</th>
+                    <th class="text-start">Buy price</th>
+                    <th class="text-start">Price</th>
+                    <th class="text-end">Percentage</th>
+                    <th class="text-end">Revenue</th>
+                    <th class="text-end">Transacted</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for elem in transactions %}
+                    <tr style="background-color: {{elem['revcolor']}}">
+                        <td class="text-start"> {{elem['type']}}{{elem["symbol"]}} </td>
+                        <td class="text-start"> {{elem["shares"]}} </td>
+                        <td class="text-start"> {{elem["buy_price"] | usd}} </td>
+                        <td class="text-start"> {{elem["pricetxt"]}}{{elem["price"] | usd}} </td>
+                        <td class="text-end"> {{elem["percentage"]}}% </td>
+                        <td class="text-end"> {{elem["revenue"] | usd}} </td>
+                        <td class="text-end"> {{elem["transacted"]}} </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+            <tfoot>
+                <tr>
+                    <td class="border-0 fw-bold text-start">TOTAL</td>
+                    <td colspan="5" class="border-0 text-end">{{totalT | usd}}</td>
+                </tr>
+            </tfoot>
+        </table>
+
+        <br>
+
+        <div class="mb-3">
+            <h3>Stocks:</h3>
+        </div>
+
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th class="text-start">Symbol</th>
+                    <th class="text-start">Shares</th>
+                    <th class="text-start">Buy Price (avg)</th>
+                    <th class="text-start">Price</th>
+                    <th class="text-end">Percentage</th>
+                    <th class="text-end">Revenue</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for elem in stocks %}
+                    <tr style="background-color: {{elem['color']}}">
+                        <td class="text-start"> {{elem["symbol"]}} </td>
+                        <td class="text-start"> {{elem["shares"]}} </td>
+                        <td class="text-start"> {{elem["buy_price"] | usd}} </td>
+                        <td class="text-start"> {{elem["pricetxt"]}}{{elem["price"]}} </td>
+                        <td class="text-end"> {{elem["percentage"]}}% </td>
+                        <td class="text-end"> {{elem["revenue"] | usd}} </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+            <tfoot>
+                <tr style="background-color: {{totalS['color']}}">
+                    <td class="border-0 fw-bold text-start" colspan="2">TOTAL</td>
+                    {% if totalS %}
+                        <td class="border-0 text-start">{{totalS["buy_price"] | usd}}</td>
+                        <td class="border-0 text-start">{{totalS["pricetxt"]}}{{totalS["price"] | usd}}</td>
+                        <td class="border-0 text-end">{{totalS["percentage"]}}%</td>
+                        <td class="border-0 text-end">{{totalS["revenue"] | usd}}</td>
+                    {% else %}
+                        <td colspan="5" class="border-0 text-end">$0.00</td>
+                    {% endif %}
+                </tr>
+            </tfoot>
+        </table>
+    </main>
+
+{% endblock %}

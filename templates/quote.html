@@ -1,0 +1,23 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Quote
+{% endblock %}
+
+{% block main %}
+    <form action="/quote" method="post">
+        <div class="mb-3">
+            <input required autocomplete="off" autofocus class="form-control mx-auto w-auto" id="symbol" name="symbol" placeholder="Stock Symbol" type="text">
+        </div>
+        <button class="btn btn-primary" type="submit">Search</button>
+    </form>
+    {% if result %}
+        <br>
+        <p>A share of {{ result.name }} ({{ result.symbol }}) costs {{ result.pricetxt }}{{ result.price | usd }}</p>
+    {% endif %}
+    {% if not_found %}
+        <br>
+        <p>Stock with symbol ({{ symbol }}) not found</p>
+    {% endif %}
+
+{% endblock %}

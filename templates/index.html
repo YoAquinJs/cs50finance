@@ -1,0 +1,59 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Finance
+{% endblock %}
+
+{% block main %}
+    <main class="container py-5 text-center">
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th class="text-start">Buy</th>
+                    <th class="text-start">Sell</th>
+                    <th class="text-start">Symbol</th>
+                    <th class="text-start">Name</th>
+                    <th class="text-end">Shares</th>
+                    <th class="text-end">Price</th>
+                    <th class="text-end">Total</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for elem in stocks%}
+                    <tr>
+                        <td class="text-start">
+                            <form action="/buy" method="post">
+                                <input id="from_index" name="from_index" type="hidden" value="True">
+                                <input id="symbol" name="symbol" type="hidden" value="{{elem['symbol']}}">
+                                <button class="btn btn-primary text-start" type="submit">Buy</button>
+                            </form>
+                        </td>
+                        <td class="text-start">
+                            <form action="/sell" method="post">
+                                <input id="from_index" name="from_index" type="hidden" value="True">
+                                <input id="symbol" name="symbol" type="hidden" value="{{elem['symbol']}}">
+                                <button class="btn btn-primary text-start" type="submit">Sell</button>
+                            </form>
+                        </td>
+                        <td class="text-start"> {{elem["symbol"]}} </td>
+                        <td class="text-start"> {{elem["name"]}} </td>
+                        <td class="text-end"> {{elem["shares"]}} </td>
+                        <td class="text-end"> {{elem["pricetxt"]}}{{elem["price"] | usd}} </td>
+                        <td class="text-end"> {{elem["total"] | usd}} </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+            <tfoot>
+                <tr>
+                    <td class="border-0 fw-bold text-end" colspan="6">Cash</td>
+                    <td class="border-0 text-end">{{cash | usd}}</td>
+                </tr>
+                <tr>
+                    <td class="border-0 fw-bold text-end" colspan="6">TOTAL</td>
+                    <td class="border-0 w-bold text-end">{{total | usd}}</td>
+                </tr>
+            </tfoot>
+        </table>
+    </main>
+
+{% endblock %}
