@@ -12,8 +12,10 @@ CACHED=2
 FAILED=3
 
 price_cache = {}
+company_names = {}
 
-APIKEY = os.getenv("API_KEY")
+APISTOCKSKEY = os.getenv("APISTOCKS_KEY")
+ALPHAKEY = os.getenv("ALPHA_KEY")
 def apology(message, code=400):
     """Render message as an apology to user."""
     def escape(s):
@@ -52,7 +54,17 @@ def lookup(symbol):
         "pricetxt":"",
         "status":SUCCESFULL
     }
-    
+
+    try:
+        if symbol not in company_names.keys():
+            url = f'https://www.alphavantage.co/query?function=SYMBOL_SEARCH&keywords={symbol}&apikey={ALPHAKEY}'
+            response = requests.get(url)
+            result["name"] = response.json()["bestMatches"][0]["2. name"]
+        else:
+            result["name"] = company_names[symbol]
+    except:
+        result["name"] = symbol
+
     try:
         url = "https://apistocks.p.rapidapi.com/intraday"
 
@@ -60,7 +72,7 @@ def lookup(symbol):
 
         headers = {
         	"content-type": "application/octet-stream",
-        	"X-RapidAPI-Key": APIKEY,
+        	"X-RapidAPI-Key": APISTOCKSKEY,
         	"X-RapidAPI-Host": "apistocks.p.rapidapi.com"
         }
 
@@ -70,17 +82,14 @@ def lookup(symbol):
         if len(response.json()["Results"]) > 0:
             result["price"] = price_cache[symbol] = float(response.json()["Results"][0]["Close"])
         else:
-            print("not found")
             result["price"] = None
             result["pricetxt"] = "Not found"
     except:
         if symbol in price_cache.keys():
-            print("cached")
             response["price"] = price_cache[symbol]
             result["pricetxt"] = "(Outdated)"
             result["status"] = CACHED
         else:
-            print("failes")
             response["price"] = 0
             result["pricetxt"] = "Couldn't fetch"
             result["status"] = FAILED

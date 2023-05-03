@@ -29,7 +29,7 @@ app.secret_key = "test"
 db = SQL("sqlite:///finance.db")
 
 load_dotenv()
-if not os.getenv("API_KEY"):# Make sure API key is set
+if not os.getenv("APISTOCKS_KEY"):# Make sure API key is set
     raise RuntimeError("IEX_KEY not set")
 
 # Set global colors for table display feedbackd
@@ -200,22 +200,26 @@ def login():
 
         # Ensure username was submitted
         if not username:
-            return apology("must provide username", 400)
+            flash("must provide username")
+            return render_template("login.html")
 
         # Ensure password was submitted
         if not password:
-            return apology("must provide password", 400)
+            flash("must provide password")
+            return render_template("login.html")
 
         # Query database for username
         rows = db.execute("SELECT * FROM users WHERE username = ?", request.form.get("username"))
 
         # Ensure username exists
         if len(rows) != 1:
-            return apology("invalid username", 404)
+            flash("username not found")
+            return render_template("login.html")
 
         # Ensure password is correct
         if not check_password_hash(rows[0]["hash"], request.form.get("password")):
-            return apology("invalid username", 401)
+            flash("incorrect password")
+            return render_template("login.html")
 
         # Remember which user has logged in
         session["user_id"] = rows[0]["id"]
@@ -654,7 +658,7 @@ def security():
     if request.method == "POST":
         action = request.form.get("action")
         password = request.form.get("password")
-
+        print(action)
         # Ensure password was submitted
         if not password:
             flash("must provide password")

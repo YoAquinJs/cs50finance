@@ -1,5 +1,6 @@
 .env
 test.py
 .venv
+finance.db
 flask_session
 __pycache__
