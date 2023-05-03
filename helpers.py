@@ -59,7 +59,7 @@ def lookup(symbol):
         if symbol not in company_names.keys():
             url = f'https://www.alphavantage.co/query?function=SYMBOL_SEARCH&keywords={symbol}&apikey={ALPHAKEY}'
             response = requests.get(url)
-            result["name"] = response.json()["bestMatches"][0]["2. name"]
+            result["name"] = company_names[symbol] = response.json()["bestMatches"][0]["2. name"]
         else:
             result["name"] = company_names[symbol]
     except:

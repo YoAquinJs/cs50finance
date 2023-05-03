@@ -13,15 +13,36 @@ Clone the repository:
 git clone https://github.com/YoAquinJs/cs50finance.git finance
 ```
 To run this application, you will need Python 3.x and Flask installed on your machine. Install [Flask](https://flask.palletsprojects.com/en/2.2.x/installation/). Then setup the flask project:
+### Windows
 ```
 cd finance
 python3 -m venv venv
 .venv/bin/activate
 ```
+Then install the dependencies:
+```
+pip install cs50
+pip install requests
+pip install python-dotenv
+
+```
 Then run the app:
 ```
 flask run
 ```
+### Linux
+Install the dependencies:
+```
+pip install flask
+pip install cs50
+pip install requests
+pip install python-dotenv
+```
+Then run the app:
+```
+flask run
+```
+
 This will start the Flask development server, and the application will be accessible at `http://127.0.0.1:5000/` (may differ, check the terminal output).
 
 ## Features
