@@ -10,7 +10,6 @@ configobj==5.0.6
 constantly==15.1.0
 cryptography==2.1.4
 cs50==9.2.5
-dataclasses==0.8
 distro-info===0.18ubuntu0.18.04.1
 Flask==2.0.3
 greenlet==2.0.2
