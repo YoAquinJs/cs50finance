@@ -1,6 +1,5 @@
 import os
 
-from json import loads
 from re import search
 from cs50 import SQL
 from flask import Flask, flash, redirect, render_template, request, session

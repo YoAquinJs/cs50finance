@@ -6,44 +6,36 @@ This repository contains a Python Flask web application of a simulation of a sto
 
 You can use [Finance]() app in here for testing it.
 
-## Installation
+## Requirements
 
-Clone the repository:
+You will need to install the next requirements for running the project on your own:
+
+[Python3.x](https://www.python.org/downloads/)
+
+[Flask](https://flask.palletsprojects.com/en/2.2.x/installation/)
+
+[Sqlite](https://sqlite.org/index.html)
+
+[Database Setup](./DATABASE.MD)
+
+[Pip installs](./requirements.txt)
+```
+pip install -r requirements.txt
+```
+
+Then clone the repository:
 ```
 git clone https://github.com/YoAquinJs/cs50finance.git finance
 ```
-To run this application, you will need Python 3.x and Flask installed on your machine. Install [Flask](https://flask.palletsprojects.com/en/2.2.x/installation/). Then setup the flask project:
-### Windows
-```
-cd finance
-python3 -m venv venv
-.venv/bin/activate
-```
-Then install the dependencies:
-```
-pip install cs50
-pip install requests
-pip install python-dotenv
 
-```
-Then run the app:
-```
-flask run
-```
-### Linux
-Install the dependencies:
-```
-pip install flask
-pip install cs50
-pip install requests
-pip install python-dotenv
-```
-Then run the app:
+## Running 
+
+To run this application setup virtual enviroment in the flask installation, then:
 ```
 flask run
 ```
 
-This will start the Flask development server, and the application will be accessible at `http://127.0.0.1:5000/` (may differ, check the terminal output).
+This will start a Flask development server, and the application will be accessible at `http://127.0.0.1:5000/`
 
 ## Features
 
