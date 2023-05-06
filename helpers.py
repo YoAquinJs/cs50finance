@@ -84,13 +84,14 @@ def lookup(symbol):
         else:
             result["price"] = None
             result["pricetxt"] = "Not found"
-    except:
+    except Exception as e:
+        print(e)
         if symbol in price_cache.keys():
-            response["price"] = price_cache[symbol]
+            result["price"] = price_cache[symbol]
             result["pricetxt"] = "(Outdated)"
             result["status"] = CACHED
         else:
-            response["price"] = 0
+            result["price"] = 0
             result["pricetxt"] = "Couldn't fetch"
             result["status"] = FAILED
 

@@ -717,39 +717,53 @@ def security():
             db.execute("UPDATE users SET hash=? WHERE id=?", generate_password_hash(new_password), session["user_id"])
 
             return logout()
-        elif action == "recovery":
-            questions = [request.form.get("question1")]
-            answers = [request.form.get("answer1")]
+        elif action == "delete":
+            # Get user input
+            account = request.form.get("account")
+            password = request.form.get("password")
 
-            if not questions[0]:
-                flash("must provide at least one question")
-                return render_template("security.html")
+            # Get user info
+            user = db.execute("SELECT cash, hash FROM users WHERE id = ?", session["user_id"])[0]
 
-            if not answers[0]:
-                flash("must provide at least one answer")
-                return render_template("security.html")
+            if not password:
+                flash("must provide password")
+                return render_template("delete.html")
 
-            for i in range (2, 6, 1):
-                question = request.form.get(f"question{i}")
-                answer = request.form.get(f"answer{i}")
+            if not account:
+                flash("must provide an account to transfer the balance and stocks")
+                return render_template("delete.html")
 
-                if question != None and question != "":
-                    questions.append(question)
-                if answer != None and answer != "":
-                    answers.append(answer)
+            # Ensure password is correct
+            if not check_password_hash(user["hash"], password):
+                flash("invalid password")
+                return render_template("delete.html")
 
-            if len(questions) != len(answers):
-                flash("must provide same number of questions and answers")
-                return render_template("security.html", pairs=len(questions), questions=questions, answers=answers)
+            total_funds = user["cash"]
 
-            # Delete previous data in database
+            # Get user stocks
+            stocks_db = db.execute("SELECT stock, shares FROM stocks WHERE user_id=?", session["user_id"])
+
+            # Sell each stock
+            for stock in stocks_db:
+                _stock = lookup(stock["stock"])
+                if _stock["status"] != SUCCESFULL:
+                    return apology("Couldn't fetch latests price", 400)
+
+                total_funds += _stock["price"] * stock["shares"]
+
+            # Transfer money to account
+
+            # Delete user information in database
+            db.execute("DELETE FROM funds WHERE user_id=?", session["user_id"])
             db.execute("DELETE FROM recovery WHERE user_id=?", session["user_id"])
+            db.execute("DELETE FROM stocks WHERE user_id=?", session["user_id"])
+            db.execute("DELETE FROM transactions WHERE user_id=?", session["user_id"])
+            db.execute("DELETE FROM users WHERE id=?", session["user_id"])
 
-            # Insert new data
-            for i in range(len(questions)):
-                db.execute("INSERT INTO recovery (user_id, question, answer) VALUES (?,?,?)", session["user_id"], questions[i], answers[i])
+            session.clear()
 
-            return redirect("/")
+            flash(f"${total_funds} transfered, account deleted")
+            return redirect("/register")
         else:
             return apology("unvalid action", 400)
 
@@ -757,172 +771,6 @@ def security():
     else:
         return render_template("security.html")
 
-
-@app.route("/recovery", methods=["GET", "POST"])
-def recovery():
-    """password recovery"""
-
-    # User reached route via POST (as by submitting a form via POST)
-    if request.method == "POST":
-        action = request.form.get("action")
-
-        if action == "search":
-            username = request.form.get("username")
-
-            # Ensure username was submitted
-            if not username:
-                flash("must provide a username")
-                return render_template("recovery.html", action="search")
-
-            row = db.execute("SELECT id FROM users WHERE username=?", username)
-            # Ensure user is found
-            if len(row) != 1:
-                flash("username not found")
-                return render_template("recovery.html", action="search")
-
-            pairs = db.execute("SELECT question, answer FROM recovery WHERE user_id=?", row[0]["id"])
-
-            if len(pairs) < 1:
-                flash("password recovery not setup")
-                return render_template("recovery.html", action="search")
-
-            return render_template("recovery.html", action="submit", id=row[0]["id"], pairs=pairs)
-
-        elif action == "submit":
-            id = request.form.get("id")
-
-            if not id:
-                flash("unvalid request")
-                return render_template("recovery.html", action="search")
-
-            pairs = db.execute("SELECT question, answer FROM recovery WHERE user_id=?", id)
-
-            for a in pairs:
-                answer = request.form.get(f"answer{pairs.index(a)+1}")
-
-                if not answer:
-                    flash(f"must provide answer {pairs.index(a)+1}")
-                    return render_template("recovery.html", action="submit", id=id, pairs=pairs)
-
-                if answer != a["answer"]:
-                    flash(f"answer {pairs.index(a)+1} incorrect")
-                    return render_template("recovery.html", action="submit", id=id, pairs=pairs)
-
-            return render_template("recovery.html", action="change", id=id)
-
-        elif action == "change":
-            # Get user input, stock symbol and amount
-            id = request.form.get("id")
-            new_password = request.form.get("new_password")
-            confirmation = request.form.get("confirmation")
-
-            # Ensure confirmation was submitted
-            if not id:
-                flash("unvalid request")
-                return render_template("recovery.html", action="change", id=id)
-
-            # Ensure confirmation was submitted
-            if not new_password:
-                flash("must provide new password")
-                return render_template("recovery.html", action="change", id=id)
-
-            # Ensure confirmation was submitted
-            if not confirmation:
-                flash("must provide new password confirmation")
-                return render_template("recovery.html", action="change", id=id)
-
-            # Ensure new password and confirmation match
-            if new_password != confirmation:
-                flash("new password and confirmation must match")
-                return render_template("recovery.html", action="change", id=id)
-
-            # Ensure password is secure, password contains at least 8 characters, letters, numbers and symbols
-
-            if len(new_password) < 8:
-                flash("Must be at least 8 characters long")
-                return render_template("recovery.html", action="change", id=id)
-
-            if search("\d", new_password) == None:
-                flash("Must include numbers")
-                return render_template("recovery.html", action="change", id=id)
-
-            if search("\D", new_password) == None:
-                flash("Must include letters")
-                return render_template("recovery.html", action="change", id=id)
-
-            if search("[+,*.|()${}]", new_password) == None:
-                flash("Must include special characters '+,*.|()${}'")
-                return render_template("recovery.html", action="change", id=id)
-
-            # Update password hash in database
-            db.execute("UPDATE users SET hash=? WHERE id=?", generate_password_hash(new_password), id)
-
-            flash("password changed")
-            return redirect("/")
-        else:
-            return apology("unvalid action", 400)
-
-    # User reached route via GET (as by clicking a link or via redirect)
-    else:
-        return render_template("recovery.html", action="search")
-
-
-@app.route("/delete", methods=["GET", "POST"])
-@login_required
-def delete():
-    # User reached route via POST (as by submitting a form via POST)
-    if request.method == "POST":
-
-        # Get user input
-        account = request.form.get("account")
-        password = request.form.get("password")
-
-        # Get user info
-        user = db.execute("SELECT cash, hash FROM users WHERE id = ?", session["user_id"])[0]
-
-        if not password:
-            flash("must provide an account to transfer the balance and stocks")
-            return render_template("funds.html", cash=user["cash"], _account=account, _password=password)
-
-        if not account:
-            flash("must provide password")
-            return render_template("funds.html", cash=user["cash"], _account=account, _password=password)
-
-        # Ensure password is correct
-        if not check_password_hash(user["hash"], password):
-            flash("invalid password")
-            return render_template("funds.html", cash=user["cash"], _account=account, _password=password)
-
-        total_funds = user["cash"]
-
-        # Get user stocks
-        stocks_db = db.execute("SELECT stock, shares FROM stocks WHERE user_id=?", session["user_id"])
-
-        # Sell each stock
-        for stock in stocks_db:
-            _stock = lookup(stock["stock"])
-            if _stock["status"] != SUCCESFULL:
-                return apology("Couldn't fetch latests price", 400)
-
-            total_funds += _stock["price"] * stock["shares"]
-
-        # Transfer money to account
-
-        # Delete user information in database
-        db.execute("DELETE FROM funds WHERE user_id=?", session["user_id"])
-        db.execute("DELETE FROM recovery WHERE user_id=?", session["user_id"])
-        db.execute("DELETE FROM stocks WHERE user_id=?", session["user_id"])
-        db.execute("DELETE FROM transactions WHERE user_id=?", session["user_id"])
-        db.execute("DELETE FROM users WHERE id=?", session["user_id"])
-
-        session.clear()
-
-        flash(f"${total_funds} transfered, account deleted")
-        return redirect("/register")
-
-    # User reached route via GET (as by clicking a link or via redirect)
-    else:
-        return redirect("/funds")
     
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)

@@ -39,23 +39,6 @@
         <button class="btn btn-primary" type="submit" id="submit">Continue</button>
     </form>
 
-    <br>
-    <div class="mb-3">
-        <h3>Delete account</h3>
-    </div>
-
-    <form action="/delete" method="post">
-        <div class="mb-3">
-            <input required autocomplete="off" autofocus class="form-control mx-auto w-auto" id="account" name="account" placeholder="Account (any pattern)" type="text" value="{{_account}}">
-        </div>
-
-        <div class="mb-3">
-            <input required class="form-control mx-auto w-auto" id="password" name="password" placeholder="Password" type="password" value="{{_password}}">
-        </div>
-
-        <button class="btn btn-primary" type="submit">Delete</button>
-    </form>
-
     <script>
         action = "{{action}}"
         if (action != ""){
