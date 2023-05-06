@@ -6,6 +6,7 @@ import urllib.parse
 from flask import redirect, render_template, request, session
 from functools import wraps
 from datetime import datetime
+from dotenv import load_dotenv
 
 SUCCESFULL=1
 CACHED=2
@@ -14,8 +15,10 @@ FAILED=3
 price_cache = {}
 company_names = {}
 
+load_dotenv()
 APISTOCKSKEY = os.getenv("APISTOCKS_KEY")
 ALPHAKEY = os.getenv("ALPHA_KEY")
+
 def apology(message, code=400):
     """Render message as an apology to user."""
     def escape(s):
