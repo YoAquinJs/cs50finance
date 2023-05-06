@@ -24,7 +24,7 @@ db = SQL("sqlite:///finance.db")
 
 load_dotenv()
 if not os.getenv("APISTOCKS_KEY"):# Make sure API key is set
-    raise RuntimeError("IEX_KEY not set")
+    raise RuntimeError("Stock api key not set")
 
 # Stock buy or stock with positive income
 GREEN = "#d6ffda"
