@@ -6,8 +6,17 @@
 
 {% block main %}
     <form action="/quote" method="post">
+        <input type="hidden" name="type" value="symbol">
         <div class="mb-3">
-            <input required autocomplete="off" autofocus class="form-control mx-auto w-auto" id="symbol" name="symbol" placeholder="Stock Symbol" type="text">
+            <input required autocomplete="off" autofocus class="form-control mx-auto w-auto" id="search" name="search" placeholder="Stock Symbol" type="text">
+        </div>
+        <button class="btn btn-primary" type="submit">Search</button>
+    </form>
+    <br>
+    <form action="/quote" method="post">
+        <input type="hidden" name="type" value="name">
+        <div class="mb-3">
+            <input required autocomplete="off" autofocus class="form-control mx-auto w-auto" id="search" name="search" placeholder="Company Name" type="text">
         </div>
         <button class="btn btn-primary" type="submit">Search</button>
     </form>
@@ -17,7 +26,7 @@
     {% endif %}
     {% if not_found %}
         <br>
-        <p>Stock with symbol ({{ symbol }}) not found</p>
+        <p>Stock ({{ search }}) not found</p>
     {% endif %}
 
 {% endblock %}

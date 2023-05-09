@@ -11,6 +11,7 @@ from dotenv import load_dotenv
 SUCCESFULL=1
 CACHED=2
 FAILED=3
+NOTFOUND=4
 
 price_cache = {}
 company_names = {}
@@ -48,6 +49,45 @@ def login_required(f):
     return decorated_function
 
 
+def fetchCompany(search, type):
+    result = {
+        "result":search,
+        "search":search,
+        "status":SUCCESFULL
+    }
+
+    try:
+        if search in company_names.keys() or search in company_names.values():
+            if type=="symbol":
+                result["result"] = company_names[search]
+            else:
+                for key in company_names.keys():
+                    if company_names[key] == search:
+                        result["result"] = key
+                        break
+            result["status"] = CACHED
+        
+        url = f'https://www.alphavantage.co/query?function=SYMBOL_SEARCH&keywords={search}&apikey={ALPHAKEY}'
+        response = requests.get(url)
+
+        found = False
+        if len(response.json()["bestMatches"]) > 0:
+            for match in response.json()["bestMatches"]:
+                if match["4. region"] == "United States":
+                    if type=="symbol":
+                        company_names[search] = match["2. name"]
+                    found = True
+                    result["result"] = match["2. name" if type=="symbol" else "1. symbol"]
+                    break
+
+        if not found:
+            result["status"] = NOTFOUND
+    except:
+        result["status"] = FAILED
+    
+    return result
+
+
 def lookup(symbol):
     """Look up quote for symbol."""
 
@@ -58,15 +98,7 @@ def lookup(symbol):
         "status":SUCCESFULL
     }
 
-    try:
-        if symbol not in company_names.keys():
-            url = f'https://www.alphavantage.co/query?function=SYMBOL_SEARCH&keywords={symbol}&apikey={ALPHAKEY}'
-            response = requests.get(url)
-            result["name"] = company_names[symbol] = response.json()["bestMatches"][0]["2. name"]
-        else:
-            result["name"] = company_names[symbol]
-    except:
-        result["name"] = symbol
+    result["name"] = fetchCompany(symbol, "symbol")["result"]
 
     try:
         url = "https://apistocks.p.rapidapi.com/intraday"
@@ -86,6 +118,7 @@ def lookup(symbol):
             result["price"] = price_cache[symbol] = float(response.json()["Results"][0]["Close"])
         else:
             result["price"] = None
+            result["status"] = NOTFOUND
             result["pricetxt"] = "Not found"
     except Exception as e:
         print(e)

@@ -6,7 +6,7 @@ from flask import Flask, flash, redirect, render_template, request, session
 from werkzeug.security import check_password_hash, generate_password_hash
 from dotenv import load_dotenv
 
-from helpers import apology, login_required, lookup, usd, timestamp, timestamp_sort
+from helpers import apology, login_required, lookup, usd, timestamp, timestamp_sort, fetchCompany
 
 # Configure application
 app = Flask(__name__)
@@ -37,6 +37,7 @@ BLANCK = "#ffffff"
 SUCCESFULL=1
 CACHED=2
 FAILED=3
+NOTFOUND=4
 
 """
 TODO
@@ -218,19 +219,23 @@ def quote():
     if request.method == "POST":
 
         # Get user input, stock symbol
-        symbol = request.form.get("symbol")
-
+        search = request.form.get("search")
+        type = request.form.get("type")
         # Ensure symbol was submitted
-        if not symbol:
+        if not search:
             flash("must provide stock symbol")
             return render_template("quote.html")
 
+        if not type:
+            return apology("Invalid action", 403)
+        
         # Search for stock
-        result = lookup(symbol)
+        companyResult = fetchCompany(search, type)
         # Verify that a stock was found
-        if result["status"] == FAILED:
-            return render_template("quote.html", symbol=symbol, not_found=True)
+        if companyResult["status"] == FAILED or companyResult["status"] == NOTFOUND:
+            return render_template("quote.html", search=search, not_found=True)
 
+        result = lookup(search if type=="symbol" else companyResult["result"])
         # Search for stock and return the result to user
         return render_template("quote.html", result=result)
 
