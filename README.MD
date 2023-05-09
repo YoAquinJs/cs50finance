@@ -1,6 +1,6 @@
 # Stock Market Portfolio Simulator
 
-This repository contains a Python Flask web application of a simulation of a stock market portfolio over time. Users can create an account, add stocks to their portfolio, and track the performance of their investments using real-time market data from [Apistosk](https://rapidapi.com/api4stocks/api/apistocks/).
+This repository contains a Python Flask web application of a simulation of a stock market portfolio over time. Users can create an account, add stocks to their portfolio, and track the performance of their investments using real-time market data from [Apistocks](https://apistocks.com/).
 
 ## Deployment
 
@@ -48,7 +48,7 @@ This will start a Flask development server, and the application will be accessib
 - User account creation and authentication
 - Portfolio management (add/remove stocks, view portfolio performance)
 - Add mroe money(simulation) 
-- Real-time market data from [Apistosk](https://rapidapi.com/api4stocks/api/apistocks/) API
+- Real-time market data from [Apistocks](https://apistocks.com/) API
 - Historical performance analysis
 
 ## Contributing
