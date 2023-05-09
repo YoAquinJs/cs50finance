@@ -28,10 +28,10 @@ Then clone the repository:
 git clone https://github.com/YoAquinJs/cs50finance.git finance
 ```
 
-Create a `.env` file for storing the api keys:
+Create a `.env` file for storing the api keys from [Apistocks](https://rapidapi.com/api4stocks/api/apistocks/) and [AplhaVantage](https://www.alphavantage.co/):
 ```
-APISTOCKS_KEY=[Apistocks](https://rapidapi.com/api4stocks/api/apistocks/) ApiKey
-ALPHA_KEY=[AplhaVantage](https://www.alphavantage.co/) ApiKey
+APISTOCKS_KEY=Apistocks Key
+ALPHA_KEY=AplhaVantage Key
 ```
 
 ## Running 
